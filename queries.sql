@@ -2,15 +2,13 @@
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE reports_versions_table (version_number smallint NOT NULL, data json NOT NULL, updated_at timestamp with time zone NOT NULL);
+CREATE TABLE reports_versions_table (report_uid uuid, version_number smallint, data json NOT NULL, updated_at timestamp with time zone NOT NULL);
 
-CREATE TABLE reports_table (report-uid uuid NOT NULL PRIMARY KEY, version_number smallint NOT NULL, date timestamp with time zone NOT NULL, shift text NOT NULL, end_ring smallint NOT NULL, end_chainage real NOT NULL, reported_by text NOT NULL, status text NOT NULL);
+CREATE TABLE reports_table (report_uid uuid PRIMARY KEY, version_number smallint, date timestamp with time zone NOT NULL, shift text NOT NULL, end_ring smallint NOT NULL, end_chainage real NOT NULL, reported_by text NOT NULL, status text NOT NULL);
 
-INSERT INTO reports_table (date, shift, end_ring, end_chainage, reported_by, status) VALUES ('2023-08-04 06:41:02', 'sed', 82, 563.55, 'Pink', 'arcu'), ('2023-11-09 07:26:00', 'curae', 100, 585.68, 'Puce', 'proin'), ('2023-02-23 05:18:43', 'pharetra', 75, 322.17, 'Turquoise', 'vestibulum'), ('2023-07-07 06:08:06', 'pede', 57, 548.9, 'Fuscia', 'integer'), ('2023-02-02 09:03:37', 'vulputate', 74, 969.91, 'Blue', 'orci');
+INSERT INTO reports_table (report_uid, date, shift, end_ring, end_chainage, reported_by, status) VALUES ('f7cbc195-5979-49fb-8b7f-dcbce65e0ab5', '2023-08-04 06:41:02', 'sed', 82, 563.55, 'Pink', 'arcu'), ('8787d83e-56a9-4eb2-a6ec-1562b03e58b0', '2023-11-09 07:26:00', 'curae', 100, 585.68, 'Puce', 'proin'), ('16f694df-8084-45dc-b262-fbd702810d94', '2023-02-23 05:18:43', 'pharetra', 75, 322.17, 'Turquoise', 'vestibulum'), ('9e650b66-7fc4-428f-9aec-1c7d465f2b30', '2023-07-07 06:08:06', 'pede', 57, 548.9, 'Fuscia', 'integer'), ('77535057-093e-4686-9f12-1677c4174698', '2023-02-02 09:03:37', 'vulputate', 74, 969.91, 'Blue', 'orci');
 
 INSERT INTO reports_versions_table (version_number, data, updated_at) VALUES (64, '[{},{}]', '2023-07-25 07:34:02'), (72, '[{},{}]', '2023-04-16 21:43:34'), (95, '[{},{}]', '2022-12-02 17:59:05'), (36, '[{},{}]', '2022-12-23 23:38:52'), (17, '[{},{}]', '2023-04-04 02:49:51');
-
-ALTER TABLE reports_versions_table ADD COLUMN report_uid uuid;
 
 ALTER TABLE reports_versions_table ADD CONSTRAINT report_uid FOREIGN KEY (report_uid) REFERENCES reports_table (report_uid);
 
@@ -61,3 +59,20 @@ UPDATE cycle_time_table as B SET breakdown_id = A.breakdown_id FROM breakdown_ta
 
 UPDATE cycle_time_table as B SET status_id = A.status_id FROM status_table as A;
 
+
+
+CREATE TABLE johnny (report_uid uuid, version_number smallint, data json NOT NULL, updated_at timestamp with time zone NOT NULL);
+
+CREATE TABLE celia (report_uid uuid PRIMARY KEY, version_number smallint, date timestamp with time zone NOT NULL, shift text NOT NULL, end_ring smallint NOT NULL, end_chainage real NOT NULL, reported_by text NOT NULL, status text NOT NULL);
+
+INSERT INTO celia (report_uid, date, shift, end_ring, end_chainage, reported_by, status) VALUES ('f7cbc195-5979-49fb-8b7f-dcbce65e0ab5', '2023-08-04 06:41:02', 'sed', 82, 563.55, 'Pink', 'arcu'), ('8787d83e-56a9-4eb2-a6ec-1562b03e58b0', '2023-11-09 07:26:00', 'curae', 100, 585.68, 'Puce', 'proin'), ('16f694df-8084-45dc-b262-fbd702810d94', '2023-02-23 05:18:43', 'pharetra', 75, 322.17, 'Turquoise', 'vestibulum'), ('9e650b66-7fc4-428f-9aec-1c7d465f2b30', '2023-07-07 06:08:06', 'pede', 57, 548.9, 'Fuscia', 'integer'), ('77535057-093e-4686-9f12-1677c4174698', '2023-02-02 09:03:37', 'vulputate', 74, 969.91, 'Blue', 'orci');
+
+INSERT INTO johnny (version_number, data, updated_at) VALUES (64, '[{},{}]', '2023-07-25 07:34:02'), (72, '[{},{}]', '2023-04-16 21:43:34'), (95, '[{},{}]', '2022-12-02 17:59:05'), (36, '[{},{}]', '2022-12-23 23:38:52'), (17, '[{},{}]', '2023-04-04 02:49:51');
+
+ALTER TABLE johnny ADD CONSTRAINT report_uid FOREIGN KEY (report_uid) REFERENCES celia (report_uid);
+
+UPDATE johnny as B SET report_uid = A.report_uid FROM celia as A;
+
+ALTER TABLE celia ADD CONSTRAINT version_number FOREIGN KEY (version_number) REFERENCES johnny (version_number);
+
+UPDATE celia as B SET version_number = A.version_number FROM johnny as A;
