@@ -12,7 +12,7 @@ INSERT INTO reports_versions_table (version_number, data, updated_at) VALUES (64
 
 ALTER TABLE reports_versions_table ADD CONSTRAINT report_uid FOREIGN KEY (report_uid) REFERENCES reports_table (report_uid);
 
-UPDATE reports_versions_table as B SET report_uid = A.report_uid FROM reports_table as A;
+UPDATE reports_versions_table as B SET report_uid = A.report_uid FROM reports_table as A WHERE B.report_uid = A.report_uid;
 
 ALTER TABLE reports_table ADD CONSTRAINT version_number FOREIGN KEY (version_number) REFERENCES reports_versions_table (version_number);
 
@@ -71,8 +71,11 @@ INSERT INTO johnny (version_number, data, updated_at) VALUES (64, '[{},{}]', '20
 
 ALTER TABLE johnny ADD CONSTRAINT report_uid FOREIGN KEY (report_uid) REFERENCES celia (report_uid);
 
-UPDATE johnny as B SET report_uid = A.report_uid FROM celia as A;
-
 ALTER TABLE celia ADD CONSTRAINT version_number FOREIGN KEY (version_number) REFERENCES johnny (version_number);
 
-UPDATE celia as B SET version_number = A.version_number FROM johnny as A;
+-- circular dependency since one value has to exist before the other but version number is filled in REPORTS_TABLE based on report id match
+-- report id is filled in REPORTS_VERSIONS_TABLE based on version number match
+-- matches cannot exist until both columns of version_number and report_id is filled. chicken or the egg situation
+UPDATE celia as B SET version_number = A.version_number FROM johnny as A WHERE B.report_uid = A.report_uid; 
+
+UPDATE johnny AS B SET report_uid = A.report_uid FROM celia AS A WHERE B.version_number = A.version_number;
