@@ -58,7 +58,7 @@ try:
 
             "INSERT INTO cycle_time_table (manufacture_defect, remarks, start_time, end_time, ring_number) VALUES (false, 'mauris vulputate elementum nullam varius', '2023-10-25 10:40:19', '2023-01-28 21:25:16', 33), (true, 'pulvinar sed nisl nunc rhoncus', '2023-01-05 22:21:41', '2023-09-07 05:32:02', 118), (true, 'volutpat sapien arcu sed augue', '2023-02-17 08:20:13', '2022-12-28 18:03:08', 44), (false, 'imperdiet nullam orci pede venenatis', '2023-04-23 23:18:33', '2023-05-10 01:29:57', 104), (false, 'fringilla rhoncus mauris enim leo', '2023-08-31 21:25:37', '2023-04-30 08:55:10', 125);",
 
-            "UPDATE cycle_time_table as B SET report_uid = A.report_uid FROM reports_versions_table as A;",
+            "UPDATE cycle_time_table as B SET report_uid = A.report_uid FROM reports_table as A;",
 
             "UPDATE cycle_time_table as B SET downtime_id = A.downtime_id FROM downtime_table as A;",
 
