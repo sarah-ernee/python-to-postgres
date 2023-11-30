@@ -1,50 +1,40 @@
 import psycopg2
-from psycopg2.extras import execute_values
 
 class PostgresqlOperations:
-    def __init__(self):
-        self.connection = psycopg2.connect(
-            database="postgres",
-            user="postgres",
-            host="localhost",
-            password="dsn",
-            port=5432
-        )
-        self.cursor = self.connection.cursor()
+    def __init__(self) -> None:
+        '''
+        Initiates connection to Cloud SQL instance with defined connection parameters.
+        '''
+        connection_params = {
+            'user': 'postgres',
+            'password': 'wtpsydneymetro2023',
+            'host': '34.151.111.183',
+            'port': '5432',
+            'database': 'shift-progress-data'
+        }
+        self.sql_conn = psycopg2.connect(**connection_params)
+        self.sql_cursor = self.sql_conn.cursor()
 
-    def create_table(self):
-        create_query = "CREATE TABLE coordinators(id integer, name text, topic text);"
-        self.cursor.execute(create_query)
-        self.connection.commit()
 
-    def populate_table(self):
-        insert_query = """
-            INSERT INTO coordinators(id, name, topic) VALUES
-                (134, 'Julia', 'Marketing'),
-                (786, 'Amanda', 'Tech'),
-                (295, 'Cerny', 'Manufacturing'),
-                (667, 'Bob', 'Production'),  
-                (915, 'Smith', 'Engineering');
-        """
-        self.cursor.execute(insert_query)
-        self.connection.commit()
+    def create_dummy_tables_in_cloud_sql(self) -> None:
+        '''
+        Create dummy data tables with connected instance and only needs to be run once.
 
-    def update_table(self):
-        update_query = "UPDATE coordinators SET topic = 'Economy' WHERE name = 'Julia'"
-        self.cursor.execute(update_query)
-        self.connection.commit()
+        Reads from SQL file containing necessary Postgres queries.
+        '''
+        with open('createMock.sql', 'r') as file:
+            queries = file.read()
 
-    def clear_table(self):
-        clear_query = "DELETE FROM coordinators;"
-        self.cursor.execute(clear_query)
-        self.connection.commit()
+            commands = queries.split(';') 
 
-    def delete_table(self):
-        delete_query = "DROP TABLE IF EXISTS coordinators;"
-        self.cursor.execute(delete_query)
-        self.connection.commit()
+            for command in commands[:-1]:
+                try:
+                    self.sql_cursor.execute(f'{command}')
+                    self.sql_conn.commit()
 
-    def close_postgresql_connection(self):
-        self.cursor.close()
-        self.connection.close()
+                except psycopg2.Error as e:
+                    print(f"Error: {e} for {command}")
+                    self.sql_conn.rollback() 
 
+            self.sql_cursor.close()
+            self.sql_conn.close()

@@ -1,5 +1,6 @@
 import psycopg2
-from pathlib import Path
+
+from helper import PostgresqlOperations
 
 connection_params = {
     'user': 'postgres',
@@ -12,27 +13,8 @@ connection_params = {
 connection = psycopg2.connect(**connection_params)
 cursor = connection.cursor()
 
+postgres_op = PostgresqlOperations()
+
 if connection:
-    print("Connection successful. Queries running......")
-
-# One-time read of sql file
-with open('createMock.sql', 'r') as file:
-    queries = file.read()
-
-commands = queries.split(';') 
-
-for command in commands[:-1]:
-    try:
-        cursor.execute(f'{command}')
-        connection.commit()
-
-    except psycopg2.Error as e:
-        print(f"Error: {e} for {command}")
-        connection.rollback() 
-
-print("Dummy postgres tables created.")
-
-cursor.close()
-connection.close()
-
+    postgres_op.create_dummy_tables_in_cloud_sql()
 
