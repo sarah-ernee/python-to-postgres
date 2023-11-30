@@ -47,3 +47,4 @@ class PostgresqlOperations:
     def close_postgresql_connection(self):
         self.cursor.close()
         self.connection.close()
+
