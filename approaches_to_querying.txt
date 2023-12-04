@@ -1,0 +1,120 @@
+Different approaches to querying data from Cloud SQL Postgres
+
+1. Adding onto progress-api-wtp endpoints with new endpoints that touch the Postgres database 
+-- see what data needs to be queried for revamp
+-- organize new endpoints around those needs, use sqlComms.py for class functions to help with say:
+    - querying data to display
+    - querying tunneling times and calculate based on event
+    - 
+
+2. Serverless Node.js function to handle SQL queries and then plug it to API in a JSON body
+
+const { Client } = require('pg'); 
+const cloudSql = require('/path/to/google-cloud-sdk');
+
+exports.handler = async (req, res) => {
+    const client = new Client();
+
+    -- const variables of connection parameters
+
+    await client.connect({
+        host: host,
+        port: port,
+        database: database,
+        user: user,
+        password: password
+    });
+
+    const result = await client.query(`SELECT id, name, age FROM my_table`);
+    const records = [];
+    
+    while(result.next()) {
+        -- storing queried data into a dictionary
+        const record = {
+            id: result.row.id,
+            name: result.row.name,
+            age: result.row.age
+            type: result.row.type // store Postgres datatype? 
+        }
+        records.push(record);
+    }
+
+    -- cloud function returns the data in JSON
+    res.json(records);
+    await client.end();
+};
+
+3. ORM (Object-Relational Mapping) library usage ie. SQLAlchemy for Python or Prima for Node.js to interact with database
+from sqlalchemy import create_engine, Column, TIMESTAMP, REAL
+from sqlalchemy.dialects.postgresql import UUID, JSON # for dialect specific data types ie. some data types are only available in Postgres
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+import json
+
+-- put in settings.py
+
+engine = create_engine(f'postgresql://{SQL_USERNAME}:{SQL_WTP_PASSWORD}@{SQL_WTP_INSTANCE}:{SQL_WTP_PORT}/{SQL_WTP_DATABASE_SP}')
+SQL_USERNAME = 'postgres'
+SQL_WTP_PASSWORD = 'wtpsydneymetro2023'
+SQL_WTP_INSTANCE = 'dst-wtp-sydney-metro'
+SQL_WTP_PORT = 5432
+SQL_WTP_DATABASE_SP = 'shift-progress-data'
+
+# Create a base class for declarative class definitions - base class is where table structure and columns are defined
+
+Base = declarative_base()
+
+# One base class per table
+class TableOne(Base):
+    __tablename__ = 'table_one'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    # Other columns specific to table_one
+
+class TableTwo(Base):
+    __tablename__ = 'table_two'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String)
+    # Other columns specific to table_two
+
+# Define your table model
+class YourTable(Base):
+    __tablename__ = 'your_table_name'  # Replace 'your_table_name' with your table name
+
+    date = Column(TIMESTAMP(timezone=False), nullable=True)
+    start_chainage = Column(REAL, nullable=True)
+    end_chainage = Column(REAL, nullable=True)
+    report_uid = Column(UUID(as_uuid=True), nullable=True)
+
+# Create a session
+Session = sessionmaker(bind=engine)
+session = Session()
+
+# Query the table for specific columns
+result = session.query(YourTable.date, YourTable.start_chainage, YourTable.end_chainage, YourTable.report_uid).all()
+
+# Process the query results
+for row in result:
+    data = {
+        'date': row.date,
+        'start_chainage': row.start_chainage,
+        'end_chainage': row.end_chainage,
+        'report_uid': row.report_uid,
+    }
+    data_list.append(data)
+
+json_data = json.dumps(data_list)
+
+# Close the session
+session.close()
+
+
+
+
+4. GraphQL server to handle connection to Cloud SQL and BQ
+-- Define schema for data that will be queried
+-- API endpoint to handle GraphQL queries and server for processing + responses
+-- Feel like it's just overcomplicating the architecture then cause we have two DB sources, APIs, a GraphQL server and apollo-client
+-- PRO: unified data layer, single endpoint that gathers data from multiple data sources, allows schema stitching (various schemas from different DBs into one schema)
