@@ -111,8 +111,6 @@ json_data = json.dumps(data_list)
 session.close()
 
 
-
-
 4. GraphQL server to handle connection to Cloud SQL and BQ
 -- Define schema for data that will be queried
 -- API endpoint to handle GraphQL queries and server for processing + responses
