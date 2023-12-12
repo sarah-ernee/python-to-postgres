@@ -46,3 +46,26 @@ for _ in range(num_records_to_insert):
 print("\nSQL Queries to Insert Mock Data:")
 for query in insert_queries:
     print(query)
+
+
+
+'''
+DO $$ 
+DECLARE 
+    user_name TEXT;
+    table_rec RECORD;
+    users TEXT[] := ARRAY['sarah', 'marcus', 'hanfai'];
+BEGIN 
+    FOREACH user_name IN ARRAY users
+    LOOP
+        FOR table_rec IN 
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public'
+        LOOP 
+            EXECUTE 'GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER, ALTER ON TABLE ' || quote_ident(table_rec.table_name) || ' TO ' || quote_ident(user_name);
+            EXECUTE 'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO ' || quote_ident(user_name);
+        END LOOP; 
+    END LOOP; 
+END $$;
+'''
