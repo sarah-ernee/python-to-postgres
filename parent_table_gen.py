@@ -8,32 +8,24 @@ MAX_VERSIONS = 100
 
 DOWNTIME_TABLE = 'downtime'
 BREAKDOWN_TABLE = 'breakdown'
-SHIFT_STT = 'shift_tbm_status'
-SHIFT_REP_STT = 'shift_report_status'
-    
-REPORT_TABLE = 'shift_report'
-RELATIONSHIP_TABLE = 'downtime_breakdown_rl'
-CYCLE_TABLE = 'cycle_time'
-
-VERSION_TABLE = 'shift_report_version'
+TBM_STATUS_TABLE = 'shift_tbm_status'
+REPORT_STATUS_TABLE = 'shift_report_status'
  
-REPORT_COLUMNS = [
-    'report_uid',
-    'version_number',
-    'date',
-    'shift',
-    'end_ring',
-    'end_chainage',
-    'reported_by',
-    'report_status_id',
+DOWNTIME_COLUMNS = [
+    'downtime_id',
+    'name',
 ]
-
-VERSION_COLUMNS = [
-    'tunnel_drive',
-    'ring_number',
-    'added_timestamp',
-    'added_by',
-    'data'
+BREAKDOWN_COLUMNS = [
+    'breakdown_id',
+    'name',
+]
+TBM_COLUMNS = [
+    'tbm_status_id',
+    'name',
+]
+STATUS_COLUMNS = [
+    'report_status_id',
+    'name',
 ]
 
 EMAILS = [
@@ -48,14 +40,31 @@ EMAILS = [
     'dana@runescape.com',
 ]
 
+BREAKDOWN_CAUSES = [
+    'Power Supply',
+    'PLC/PCs',
+    'Water Cooling Circuits',
+    'Lubrication Grease, Gearbox Oil',
+    'Sacrificial Grease (Tailskin, Shield Articulation, Main Drive, etc)',
+    'Hydraulic Systems (Main, Auxiliary)',
+    'Gripper functions (Main, Stabilizer)',
+    'Roll Correction',
+    'Thrust Cylinder (Main and Auxiliary)',
+    'Cutting Wheel'
+]
+
+
+
 
 def nullable(*args):
     return random.choice(['null', *args])
 
 
 if __name__ == '__main__':
-    versions = []
-    reports = []  # list of latest report versions
+    downtime = []
+    breakdown = []  
+    tbm_status = []
+    report_status = [] # list of latest report versions
 
     for ring_number in range(1, RINGS):
         for tunnel_drive in TUNNEL_DRIVES:
