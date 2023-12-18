@@ -9,7 +9,6 @@ CREATE TABLE downtime_breakdown_rl (
    CONSTRAINT breakdown_id FOREIGN KEY (breakdown_id) REFERENCES breakdown(breakdown_id) ON DELETE CASCADE 
 );
 
-
 INSERT INTO downtime_breakdown_rl (downtime_id, breakdown_id, id) VALUES (4, 2, 1);
 INSERT INTO downtime_breakdown_rl (downtime_id, breakdown_id, id) VALUES (3, 9, 2);
 INSERT INTO downtime_breakdown_rl (downtime_id, breakdown_id, id) VALUES (5, 9, 3);
