@@ -1,53 +1,57 @@
 import random
 import time
 from datetime import datetime
+import json
 
+# 5600 SHIFT REPORTS - VERSIONS TABLE NEED TO FOLLOW
 TUNNEL_DRIVES = ['OP-EB', 'OP-WB']
-RINGS = 2800
+SHIFT = ['DS', 'NS']
+RINGS = 1400
 MAX_VERSIONS = 100
-
-DOWNTIME_TABLE = 'downtime'
-BREAKDOWN_TABLE = 'breakdown'
-SHIFT_STT = 'shift_tbm_status'
-SHIFT_REP_STT = 'shift_report_status'
     
 REPORT_TABLE = 'shift_report'
-RELATIONSHIP_TABLE = 'downtime_breakdown_rl'
-CYCLE_TABLE = 'cycle_time'
-
 VERSION_TABLE = 'shift_report_version'
- 
+
+# remove FKs and GENERATED ALWAYS AS IDENTITY since we don't need to insert those
 REPORT_COLUMNS = [
     'report_uid',
-    'version_number',
     'date',
     'shift',
     'end_ring',
     'end_chainage',
     'reported_by',
-    'report_status_id',
 ]
-
 VERSION_COLUMNS = [
-    'tunnel_drive',
-    'ring_number',
-    'added_timestamp',
-    'added_by',
-    'data'
+    'data',
+    'updated_at',
 ]
 
 EMAILS = [
-    'hanfai@hoyoverse.com',
-    'marcus@gmail.com',
-    'sarah@tiktok.com',
-    'kaiwen@reddit.com',
-    'kenny@facebook.com',
-    'zhynn@twitter.com',
-    'sam@gamuda.com',
-    'chu@planetfitness.com',
-    'dana@runescape.com',
+    'hanfai@gamuda.com.my',
+    'marcus@gamuda.com.my',
+    'sarah@gamuda.com.my',
+    'kaiwen@gamuda.com.my',
+    'kenny@gamuda.com.my',
+    'zhynn@gamuda.com.my',
+    'sam@gamuda.com.my',
+    'chu@gamuda.com.my',
+    'dana@gamuda.com.my',
 ]
 
+LOCATIONS = [
+    'Rosehill Site',
+    'Palm Grove Site',
+    'Sorascea Site',
+    'Thalmes Site'
+]
+
+STRUCTURES = [
+    'Sinkholes Detected',
+    'Muddy Foundation',
+    'Ground Fissures',
+    'Heavy Underground Piping Networks'
+]
+ 
 
 def nullable(*args):
     return random.choice(['null', *args])
@@ -55,194 +59,164 @@ def nullable(*args):
 
 if __name__ == '__main__':
     versions = []
-    reports = []  # list of latest report versions
+    reports = [] 
 
-    for ring_number in range(1, RINGS):
+    # 2800 rings per drive for both shifts - 5600 reports
+    for ring_number in range(1, RINGS, 1):
         for tunnel_drive in TUNNEL_DRIVES:
-            form_ref = f'{tunnel_drive}-R{ring_number}-{datetime.now().strftime("%Y%m%d")}'
-            tbm = 'S1347' if tunnel_drive == 'OP-EB' else 'S1348'
-            chainage = random.random() * 20_000
-            shift = random.choice(['Day', 'Night'])
-            created_by = random.choice(EMAILS)
-            created_at = datetime.utcfromtimestamp(time.time())
-
-            v = random.randint(1, MAX_VERSIONS)
-
-            for version in range(v):
+            for shift in SHIFT:
+                date = datetime.utcfromtimestamp(time.time()) 
+                end_ring = random.randint(100, 2_800)
+                end_chainage = random.uniform(19_100.000000000, 19_300.000000000)
+                reported_by = random.choice(EMAILS)
+                
+                # -------------------------------------- JSONB DATA ------------------------------------- #
+                form_ref = f'{tunnel_drive}-R{ring_number}-{datetime.now().strftime("%Y%m%d")}'
                 status = random.choice(
-                    ['draft', 'submitted', 'approved', 'rejected']
-                )
+                        ['draft', 'submitted', 'approved', 'rejected']
+                    )
+                tbm = 'S1347' if tunnel_drive == 'OP-EB' else 'S1348'
+                chainage = random.uniform(18_000.000000000, 20_000.000000000)           
+                timestamp = datetime.utcfromtimestamp(time.time())
+                
+                # Nested progress dict
+                cumulative_mined_dist = random.uniform(-20_000.000000000, 30_000.000000000) 
+                current_location = random.choice(LOCATIONS)
+                end_ring = ring_number + 5
+                sensitive_structures = random.choice(STRUCTURES)            
+                start_chainage = random.uniform(19_400.000000000, 19_600.000000000)
+                
+                # Nested status duration dict
+                ring_duration = random.random() * 15_000
+                stopped_duration = random.random() * 25_000
+                ring_duration_pc = random.random() * 15
+                stopped_duration_pc = random.random() * 40
 
-                updated_by = nullable(f'"{random.choice(EMAILS)}"')
-                if updated_by != 'null':
+                # Nested grout injection array
+                target_injection = random.random() * 9_000
+                total_comp_a = random.randrange(1_000, 4_500)
+                total_comp_b = random.randrange(1_000, 4_500)
+                total_volume = total_comp_a + total_comp_b
+
+                v = random.randint(1, MAX_VERSIONS)
+                print(v)
+                for version in range(v):
                     updated_at = f'"{datetime.utcfromtimestamp(time.time() + 24 * 60 * 60 * version)}"'
-                else:
-                    updated_at = 'null'
 
-                submitted_by = nullable(f'"{random.choice(EMAILS)}"')
-                if submitted_by != 'null':
-                    submitted_at = f'"{datetime.utcfromtimestamp(time.time() + 24 * 60 * 60 * version)}"'
-                else:
-                    submitted_at = 'null'
-
-                rejected_by = nullable(f'"{random.choice(EMAILS)}"')
-                if rejected_by != 'null':
-                    rejected_at = f'"{datetime.utcfromtimestamp(time.time() + 24 * 60 * 60 * version)}"'
-                else:
-                    rejected_at = 'null'
-
-                approved_by = nullable(f'"{random.choice(EMAILS)}"')
-                if approved_by != 'null':
-                    approved_at = f'"{datetime.utcfromtimestamp(time.time() + 24 * 60 * 60 * version)}"'
-                else:
-                    approved_at = 'null'
-
-                added = random.choice(
-                    list(
-                        filter(
-                            lambda x: x['by'] != 'null',
-                            [
-                                {'by': created_by, 'at': created_at},
-                                {'by': updated_by, 'at': updated_at},
-                                {'by': submitted_by, 'at': submitted_at},
-                                {'by': rejected_by, 'at': rejected_at},
-                                {'by': approved_by, 'at': approved_at},
+                    dict = {
+                        "formRef": form_ref,
+                        "status": status,
+                        "tbm": tbm,
+                        "tunnelDrive": tunnel_drive,
+                        "ring": ring_number,
+                        "chainage": chainage,
+                        "shift": shift,
+                        "timestamp": timestamp,
+                        "progress": {
+                            "cumulativeMinedDist": cumulative_mined_dist,
+                            "currentLocation": current_location,
+                            "endChainage": end_chainage,
+                            "endRingNumber": end_ring,
+                            "sensitiveStructures": sensitive_structures,
+                            "startChainage": start_chainage,
+                            "startRingNumber": ring_number,
+                        },
+                        "statusDurationPercentage": {
+                            "durations": {
+                                "ringBuild": ring_duration,
+                                "stopped": stopped_duration
+                            },
+                            "percentages": {
+                                "ringBuild": ring_duration_pc,
+                                "stopped": stopped_duration_pc
+                            }
+                        },
+                        "groutInfo": {
+                            "groutInjectionVolume": [
+                                {
+                                    "ringNumber": ring_number,
+                                    "target": target_injection, 
+                                    "totalVolume": total_volume, 
+                                    "totalCompA": total_comp_a,
+                                    "totalCompB": total_comp_b, 
+                                }
                             ]
+                        }
+                    }
+
+                    json_string = json.dumps(dict, default=str)
+                    data = f"'{json_string}'::jsonb"
+                        
+                    values = f"{data}, {updated_at}"
+                    versions.append(
+                        f'INSERT INTO {VERSION_TABLE} ({", ".join(VERSION_COLUMNS)}) VALUES ({values})'
+                    )
+
+                    if version == v - 1:
+                        report_value = [
+                            'uuid_generate_v4()',
+                            f'{date}',
+                            f"'{shift}'",
+                            f'{end_ring}',
+                            f'{end_chainage}',
+                            f"'{reported_by}'",
+                        ]
+                        reports.append(
+                            f'INSERT INTO {REPORT_TABLE} ({", ".join(REPORT_COLUMNS)}) VALUES ({', '.join(report_value)})'
                         )
-                    )
-                )
 
-                data = f'''\'{{
-    "formRef": "{form_ref}",
-    "status": "{status}",
-    "tbm": "{tbm}",
-    "tunnelDrive": "{tunnel_drive}",
-    "ring": {ring_number},
-    "chainage": {chainage},
-    "shift": "{shift}",
-    "createdBy": "{created_by}",
-    "timestamp": "{created_at}",
-    "updatedBy": {updated_by},
-    "updatedTimestamp": {updated_at},
-    "submittedBy": {submitted_by},
-    "submittedTimestamp": {submitted_at},
-    "rejectedBy": {rejected_by},
-    "rejectedTimestamp": {rejected_at},
-    "approvedBy": {approved_by},
-    "approvedTimestamp": {approved_at}
-}}\'::jsonb'''
-
-                values = f"'{tunnel_drive}', {ring_number}, '{added['at']}', '{added['by']}', {data}"
-                versions.append(
-                    f'INSERT INTO {VERSION_TABLE} ({", ".join(VERSION_COLUMNS)}) VALUES ({values})'
-                )
-
-                if version == v - 1:
-                    report_value = [
-                        f"'{tunnel_drive}'",
-                        f'{ring_number}',
-                        f"'{form_ref}'",
-                        f"'{created_at}'",
-                        f"'{created_by}'",
-                        f'{chainage}',
-                        f"'{status}'",
-                        data,
-                    ]
-                    reports.append(
-                        f'INSERT INTO {REPORT_TABLE} ({", ".join(REPORT_COLUMNS)}) VALUES ({", ".join(report_value)})'
-                    )
-
-    with open('./ring-report-version.sql', 'w') as file:
+    with open('./sql/shift-report-version.sql', 'w') as file:
         for version in versions:
             file.write(version)
             file.write(';\n')
 
-    with open('./ring-report.sql', 'w') as file:
-        for report in reports:
-            file.write(report)
-            file.write(';\n')
+    # with open('./sql/shift-report.sql', 'w') as file:
+    #     for report in reports:
+    #         file.write(report)
+    #         file.write(';\n')
 
 
-# paginate ring report
-# note: query with offset is noticeably slower
 '''
-EXPLAIN ANALYZE
-SELECT
-    *
-FROM
-    ring_report
-WHERE
-    tunnel_drive = 'OP-EB'
-ORDER BY
-   ring_number DESC
-OFFSET
-    1000
-LIMIT
-    10;
+INSERT INTO shift_report (report_uid, date, shift, end_ring, end_chainage, reported_by) 
+VALUES (uuid_generate_v4(), 2023-12-19 12:10:15.584209, 'DS', 6, (19114,), 'zhynn@gamuda.com.my');
 '''
 
-# paginate ring report
-# with filters
 '''
-EXPLAIN ANALYZE
-SELECT
-    *
-FROM
-    ring_report
-WHERE
-    tunnel_drive = 'OP-EB'
-    AND status = 'rejected'
-    AND ring_number BETWEEN 400 AND 1200
-ORDER BY
-   ring_number DESC
-OFFSET
-    1000
-LIMIT
-    10;
-'''
-
-# ring report version history timeline
-'''
-EXPLAIN ANALYZE
-SELECT 
-    *
-FROM
-    ring_report_version
-WHERE
-    tunnel_drive = 'OP-EB'
-    AND ring_number = 500
-ORDER BY
-    added_timestamp DESC;
-'''
-
-# ring report table
-'''
-CREATE TABLE report (
-    tunnel_drive VARCHAR(10),
-    ring_number INT,
-    form_ref VARCHAR(40) NOT NULL,
-    created_timestamp TIMESTAMP NOT NULL,
-    created_by VARCHAR(255) NOT NULL,
-    chainage REAL,
-    status VARCHAR(20) NOT NULL,
-    data JSONB NOT NULL,
-    PRIMARY KEY(tunnel_drive, ring_number)
-);
-'''
-
-# ring report version table
-'''
-CREATE TABLE report_version (
-    id INT GENERATED ALWAYS AS IDENTITY,
-    tunnel_drive VARCHAR(10),
-    ring_number INT,
-    added_timestamp TIMESTAMP NOT NULL,
-    added_by VARCHAR(255) NOT NULL,
-    data JSONB NOT NULL,
-    PRIMARY KEY(id),
-    CONSTRAINT report_version_fkey 
-        FOREIGN KEY(tunnel_drive, ring_number)
-            REFERENCES report(tunnel_drive, ring_number)
-            ON DELETE CASCADE
-);
+INSERT INTO shift_report_version (data, updated_at) 
+VALUES (''
+{
+    "formRef": "OP-EB-R1-20231219", 
+    "status": "submitted",
+    "tbm": "S1347", 
+    "tunnelDrive": "OP-EB", 
+    "ring": 1, 
+    "chainage": 364.0909915911994, 
+    "shift": "DS", 
+    "timestamp": "2023-12-19 12:10:15.594224", 
+    "progress": {
+        "cumulativeMinedDist": 27750, 
+        "currentLocation": "Sorascea Site", 
+        "endChainage": [19114],
+        "endRingNumber": 6, 
+        "sensitiveStructures": "Heavy Underground Piping Networks", 
+        "startChainage": 19477, 
+        "startRingNumber": 1
+        }, 
+    "statusDurationPercentage": {
+        "durations": {"ringBuild": 4585.023413000946, "stopped": 2276.5844671896907}, 
+        "percentages": {"ringBuild": 9.594925034615157, "stopped": 1.1697555399236625}
+        }, 
+    "groutInfo": {
+        "groutInjectionVolume": [
+            {
+                "ringNumber": 1, 
+                "target": 6182.489715249773, 
+                "totalVolume": 4468, 
+                "totalCompA": 1031, 
+                "totalCompB": 3437
+            }
+        ]
+    }
+}'::jsonb,'
+    '"2023-12-19 12:10:15.594224"');
 '''
