@@ -176,46 +176,36 @@ if __name__ == '__main__':
 
 
 '''
-INSERT INTO shift_report (report_uid, date, shift, end_ring, end_chainage, reported_by) 
-VALUES (uuid_generate_v4(), 2023-12-19 12:10:15.584209, 'DS', 6, (19114,), 'zhynn@gamuda.com.my');
+CREATE TABLE IF NOT EXISTS shift_report (
+   report_uid UUID NOT NULL,
+   version_number INT GENERATED ALWAYS AS IDENTITY NOT NULL,
+   date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+   shift TEXT NOT NULL,
+   end_ring INT NOT NULL,
+   end_chainage REAL NOT NULL,
+   reported_by TEXT NOT NULL,
+   report_status_id INT,
+
+   PRIMARY KEY (report_uid),
+   CONSTRAINT report_status_id
+      FOREIGN KEY (report_status_id)
+         REFERENCES shift_report_status(report_status_id)
+         ON DELETE CASCADE
+);
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 '''
 
+
 '''
-INSERT INTO shift_report_version (data, updated_at) 
-VALUES (''
-{
-    "formRef": "OP-EB-R1-20231219", 
-    "status": "submitted",
-    "tbm": "S1347", 
-    "tunnelDrive": "OP-EB", 
-    "ring": 1, 
-    "chainage": 364.0909915911994, 
-    "shift": "DS", 
-    "timestamp": "2023-12-19 12:10:15.594224", 
-    "progress": {
-        "cumulativeMinedDist": 27750, 
-        "currentLocation": "Sorascea Site", 
-        "endChainage": [19114],
-        "endRingNumber": 6, 
-        "sensitiveStructures": "Heavy Underground Piping Networks", 
-        "startChainage": 19477, 
-        "startRingNumber": 1
-        }, 
-    "statusDurationPercentage": {
-        "durations": {"ringBuild": 4585.023413000946, "stopped": 2276.5844671896907}, 
-        "percentages": {"ringBuild": 9.594925034615157, "stopped": 1.1697555399236625}
-        }, 
-    "groutInfo": {
-        "groutInjectionVolume": [
-            {
-                "ringNumber": 1, 
-                "target": 6182.489715249773, 
-                "totalVolume": 4468, 
-                "totalCompA": 1031, 
-                "totalCompB": 3437
-            }
-        ]
-    }
-}'::jsonb,'
-    '"2023-12-19 12:10:15.594224"');
+CREATE TABLE IF NOT EXISTS shift_report_version (
+   report_uid UUID,
+   version_number INT GENERATED ALWAYS AS IDENTITY NOT NULL, 
+   data JSONB NOT NULL,
+   updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+   id INT GENERATED ALWAYS AS IDENTITY,
+   PRIMARY KEY (id),
+
+   CONSTRAINT report_uid FOREIGN KEY (report_uid) REFERENCES shift_report(report_uid) ON DELETE CASCADE
+);
 '''
