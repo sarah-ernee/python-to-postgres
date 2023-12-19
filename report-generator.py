@@ -99,7 +99,6 @@ if __name__ == '__main__':
                 total_volume = total_comp_a + total_comp_b
 
                 v = random.randint(1, MAX_VERSIONS)
-                print(v)
                 for version in range(v):
                     updated_at = f'"{datetime.utcfromtimestamp(time.time() + 24 * 60 * 60 * version)}"'
 
@@ -155,7 +154,7 @@ if __name__ == '__main__':
                     if version == v - 1:
                         report_value = [
                             'uuid_generate_v4()',
-                            f'{date}',
+                            f"'{date}'",
                             f"'{shift}'",
                             f'{end_ring}',
                             f'{end_chainage}',
@@ -165,15 +164,15 @@ if __name__ == '__main__':
                             f'INSERT INTO {REPORT_TABLE} ({", ".join(REPORT_COLUMNS)}) VALUES ({', '.join(report_value)})'
                         )
 
-    with open('./sql/shift-report-version.sql', 'w') as file:
-        for version in versions:
-            file.write(version)
-            file.write(';\n')
-
-    # with open('./sql/shift-report.sql', 'w') as file:
-    #     for report in reports:
-    #         file.write(report)
+    # with open('./sql/shift-report-version.sql', 'w') as file:
+    #     for version in versions:
+    #         file.write(version)
     #         file.write(';\n')
+
+    with open('./sql/shift-report.sql', 'w') as file:
+        for report in reports:
+            file.write(report)
+            file.write(';\n')
 
 
 '''
