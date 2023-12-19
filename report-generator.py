@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
                 v = random.randint(1, MAX_VERSIONS)
                 for version in range(v):
-                    updated_at = f'"{datetime.utcfromtimestamp(time.time() + 24 * 60 * 60 * version)}"'
+                    updated_at = f"'{datetime.utcfromtimestamp(time.time() + 24 * 60 * 60 * version)}'"
 
                     dict = {
                         "formRef": form_ref,
@@ -208,4 +208,8 @@ CREATE TABLE IF NOT EXISTS shift_report_version (
 
    CONSTRAINT report_uid FOREIGN KEY (report_uid) REFERENCES shift_report(report_uid) ON DELETE CASCADE
 );
+
+INSERT INTO shift_report_version (report_uid)
+SELECT (report_uid)::uuid
+FROM shift_report;
 '''
