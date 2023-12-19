@@ -7,7 +7,7 @@ import json
 TUNNEL_DRIVES = ['OP-EB', 'OP-WB']
 SHIFT = ['DS', 'NS']
 RINGS = 1400
-MAX_VERSIONS = 100
+MAX_VERSIONS = 10
     
 REPORT_TABLE = 'shift_report'
 VERSION_TABLE = 'shift_report_version'
@@ -164,15 +164,15 @@ if __name__ == '__main__':
                             f'INSERT INTO {REPORT_TABLE} ({", ".join(REPORT_COLUMNS)}) VALUES ({', '.join(report_value)})'
                         )
 
-    # with open('./sql/shift-report-version.sql', 'w') as file:
-    #     for version in versions:
-    #         file.write(version)
-    #         file.write(';\n')
-
-    with open('./sql/shift-report.sql', 'w') as file:
-        for report in reports:
-            file.write(report)
+    with open('./sql/shift-report-version.sql', 'w') as file:
+        for version in versions:
+            file.write(version)
             file.write(';\n')
+
+    # with open('./sql/shift-report.sql', 'w') as file:
+    #     for report in reports:
+    #         file.write(report)
+    #         file.write(';\n')
 
 
 '''
