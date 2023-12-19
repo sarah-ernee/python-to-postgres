@@ -1,4 +1,4 @@
-CREATE TABLE shift_report (
+CREATE TABLE IF NOT EXISTS shift_report (
    report_uid UUID NOT NULL,
    version_number INT GENERATED ALWAYS AS IDENTITY NOT NULL,
    date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -9,9 +9,9 @@ CREATE TABLE shift_report (
    report_status_id INT,
 
    PRIMARY KEY (report_uid),
-   CONSTRAINT reports_uid
-      FOREIGN KEY (reports_status_id)
-         REFERENCES shift_report_status(reports_status_id)
+   CONSTRAINT report_status_id
+      FOREIGN KEY (report_status_id)
+         REFERENCES shift_report_status(report_status_id)
          ON DELETE CASCADE
 );
 
