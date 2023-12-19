@@ -82,9 +82,8 @@ if __name__ == '__main__':
     for id in range(1, MAX_DOWNTIME_BREAKDOWN):
         downtime_id = random.randint(1, 6)
         breakdown_id = random.randint(1, len(BREAKDOWN_CAUSES))
-        id = id
 
-        values = f"{downtime_id}, {breakdown_id}, {id}"
+        values = f"{downtime_id}, {breakdown_id}"
         relationships.append(
             f'INSERT INTO {RELATIONSHIP_TABLE} ({", ".join(RELATIONSHIP_COLUMNS)}) VALUES ({values})'
         )
@@ -95,54 +94,54 @@ if __name__ == '__main__':
             file.write(';\n')
 
     # ------------------------------------ ALL THE PARENT TABLES (THOSE WITH PRIMARY KEY) ----------------------- #
-    if non_generated:
-        downtimes = []
-        breakdowns = []
-        tbm_states = []
-        rep_statuses = []
+    # if non_generated:
+    #     downtimes = []
+    #     breakdowns = []
+    #     tbm_states = []
+    #     rep_statuses = []
 
-        for id in range(1, MAX_DOWNTIME):
-            name = DOWNTIME_TYPES[id - 1]
-            values = f"'{name}'"
-            downtimes.append(
-                f'INSERT INTO {DOWNTIME_TABLE} ({", ".join(DOWNTIME_COLUMNS)}) VALUES ({values})'
-            )
+    #     for id in range(1, MAX_DOWNTIME):
+    #         name = DOWNTIME_TYPES[id - 1]
+    #         values = f"'{name}'"
+    #         downtimes.append(
+    #             f'INSERT INTO {DOWNTIME_TABLE} ({", ".join(DOWNTIME_COLUMNS)}) VALUES ({values})'
+    #         )
 
-        for id in range(1, MAX_BREAKDOWN):
-            name = BREAKDOWN_CAUSES[id - 1]
-            values = f"'{name}'"
-            breakdowns.append(
-                f'INSERT INTO {BREAKDOWN_TABLE} ({", ".join(BREAKDOWN_COLUMNS)}) VALUES ({values})'
-            )
+    #     for id in range(1, MAX_BREAKDOWN):
+    #         name = BREAKDOWN_CAUSES[id - 1]
+    #         values = f"'{name}'"
+    #         breakdowns.append(
+    #             f'INSERT INTO {BREAKDOWN_TABLE} ({", ".join(BREAKDOWN_COLUMNS)}) VALUES ({values})'
+    #         )
 
-        for id in range(1, MAX_TBM_STATUS):
-            name = TBM_STATUSES[id - 1]
-            values = f"'{name}'"
-            tbm_states.append(f'INSERT INTO {TBM_STATUS_TABLE} ({", ".join(TBM_COLUMNS)}) VALUES ({values})'
-            )
+    #     for id in range(1, MAX_TBM_STATUS):
+    #         name = TBM_STATUSES[id - 1]
+    #         values = f"'{name}'"
+    #         tbm_states.append(f'INSERT INTO {TBM_STATUS_TABLE} ({", ".join(TBM_COLUMNS)}) VALUES ({values})'
+    #         )
 
-        for id in range(1, MAX_REP_STATUS):
-            name = REPORT_STATUSES[id - 1]
-            values = f"'{name}'"
-            rep_statuses.append(f'INSERT INTO {REPORT_STATUS_TABLE} ({", ".join(STATUS_COLUMNS)}) VALUES ({values})'
-            )
+    #     for id in range(1, MAX_REP_STATUS):
+    #         name = REPORT_STATUSES[id - 1]
+    #         values = f"'{name}'"
+    #         rep_statuses.append(f'INSERT INTO {REPORT_STATUS_TABLE} ({", ".join(STATUS_COLUMNS)}) VALUES ({values})'
+    #         )
 
-        with open('./sql/parent_tables.sql', 'w') as file:
-            for downtime in downtimes:
-                file.write(downtime)
-                file.write(';\n')
+        # with open('./sql/parent_tables.sql', 'w') as file:
+        #     for downtime in downtimes:
+        #         file.write(downtime)
+        #         file.write(';\n')
 
-            for breakdown in breakdowns:
-                file.write(breakdown)
-                file.write(';\n')
+        #     for breakdown in breakdowns:
+        #         file.write(breakdown)
+        #         file.write(';\n')
 
-            for tbm_status in tbm_states:
-                file.write(tbm_status)
-                file.write(';\n')
+        #     for tbm_status in tbm_states:
+        #         file.write(tbm_status)
+        #         file.write(';\n')
             
-            for report_status in rep_statuses:
-                file.write(report_status)
-                file.write(';\n')
+        #     for report_status in rep_statuses:
+        #         file.write(report_status)
+        #         file.write(';\n')
 
 
     
