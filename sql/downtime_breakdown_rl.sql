@@ -1,4 +1,4 @@
-CREATE TABLE downtime_breakdown_rl (
+CREATE TABLE IF NOT EXISTS downtime_breakdown_rl (
    downtime_id INT,
    breakdown_id INT,
    id INT GENERATED ALWAYS AS IDENTITY,
@@ -305,5 +305,5 @@ INSERT INTO downtime_breakdown_rl (downtime_id, breakdown_id) VALUES (5, 7);
 INSERT INTO downtime_breakdown_rl (downtime_id, breakdown_id) VALUES (5, 9);
 INSERT INTO downtime_breakdown_rl (downtime_id, breakdown_id) VALUES (3, 3);
 
-ALTER TABLE downtime_breakdown_rl ADD CONSTRAINT downtime_id FOREIGN KEY (downtime_id) REFERENCES downtime(downtime_id) ON DELETE CASCADE,
-ALTER TABLE downtime_breakdown_rl ADD CONSTRAINT breakdown_id FOREIGN KEY (breakdown_id) REFERENCES breakdown(breakdown_id) ON DELETE CASCADE
+ALTER TABLE downtime_breakdown_rl ADD CONSTRAINT downtime_id FOREIGN KEY (downtime_id) REFERENCES downtime(downtime_id) ON DELETE CASCADE;
+ALTER TABLE downtime_breakdown_rl ADD CONSTRAINT breakdown_id FOREIGN KEY (breakdown_id) REFERENCES breakdown(breakdown_id) ON DELETE CASCADE;

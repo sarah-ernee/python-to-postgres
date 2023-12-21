@@ -41,31 +41,92 @@ class PostgresqlOperations:
             self.sql_cursor.close()
             self.sql_conn.close() 
 
+
+    def retrieve_foreign_key_report_uid(self) -> list:
+        '''
+        Queries report_uid values which is used as a foreign key in cycle time and grease report.
+
+        Retrieves report_uid from shift_report.
+        '''
+        report_uids = []
+
+        self.sql_cursor.execute('SELECT report_uid FROM shift_report;')
+        result = [row[0] for row in self.sql_cursor.fetchall()]
+        report_uids.append(result)
+
+        print("Report uids retrieved")
+
+        return report_uids
+
+
+    # def retrieve_cycle_foreign_keys_values(self) -> list:
+    #     '''
+    #     Queries data values for foreign keys in cycle time and returns it as lists.
+
+    #     Retrieves downtime_id, breakdown_id and tbm_status_id from respective parent tables.
+    #     '''
+    #     downtime_ids = []
+    #     breakdown_ids = []
+    #     tbm_status_ids = []
+
+    #     fk_queries = [
+    #         'SELECT downtime_id FROM downtime;', downtime_ids,
+    #         'SELECT report_uid FROM breakdown;', breakdown_ids,
+    #         'SELECT report_uid FROM shift_tbm_status;', tbm_status_ids
+    #     ]
+        
+    #     for query, results in fk_queries:
+    #         self.sql_cursor.execute(query)
+    #         result = [row[0] for row in self.sql_cursor.fetchall()]
+    #         results.append(result)
+
+    #     return downtime_ids, breakdown_ids, tbm_status_ids
+    
+
     def retrieve_cycle_foreign_keys_values(self) -> list:
         '''
         Queries data values for foreign keys in cycle time and returns it as lists.
 
-        Retrieves report_uid, downtime_id, breakdown_id and tbm_status_id from respective parent tables.
+        Retrieves downtime_id, breakdown_id, and tbm_status_id from respective parent tables.
         '''
-        # extend results?
-        report_uids = []
         downtime_ids = []
         breakdown_ids = []
         tbm_status_ids = []
 
-        fk_queries = [
-            'SELECT report_uid FROM shift_report;', report_uids,
-            'SELECT downtime_id FROM downtime;', downtime_ids,
-            'SELECT report_uid FROM breakdown;', breakdown_ids,
-            'SELECT report_uid FROM shift_tbm_status;', tbm_status_ids
+        # Execute queries and store results separately
+        queries = [
+            'SELECT downtime_id FROM downtime;',
+            'SELECT breakdown_id FROM breakdown;',
+            'SELECT tbm_status_id FROM shift_tbm_status;'
         ]
-        
-        for query, results in fk_queries:
+
+        results = [downtime_ids, breakdown_ids, tbm_status_ids]
+
+        for i, query in enumerate(queries):
             self.sql_cursor.execute(query)
             result = [row[0] for row in self.sql_cursor.fetchall()]
-            results.append(result)
+            results[i].extend(result)
+            print(f"Values retrieved for {results[i]}")
 
-        return report_uids, downtime_ids, breakdown_ids, tbm_status_ids
+        return downtime_ids, breakdown_ids, tbm_status_ids
+
+
+    def retrieve_foreign_key_grease_id(self) -> list:
+        '''
+        Queries grease_id which is used as a foreign key in grease report.
+
+        Retrieves grease_id from grease.
+        '''
+        grease_ids = []
+        
+        self.sql_cursor.execute('SELECT grease_id FROM grease;')
+        result = [row[0] for row in self.sql_cursor.fetchall()]
+        grease_ids.append(result)
+
+        print("Grease ids retrieved")
+
+        return grease_ids
+
 
     @staticmethod
     def generate_report_uid() -> str:

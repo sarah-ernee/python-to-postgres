@@ -196,6 +196,8 @@ CREATE TABLE IF NOT EXISTS grease (
    name TEXT NOT NULL,
    PRIMARY KEY (grease_id)
 );
+
+C:/Users/Sarah/Desktop/python-to-postgres/sql/parent_tables.sql
 '''
 
 
@@ -210,5 +212,7 @@ CREATE TABLE downtime_breakdown_rl (
    CONSTRAINT downtime_id FOREIGN KEY (downtime_id) REFERENCES downtime(downtime_id) ON DELETE CASCADE,
    CONSTRAINT breakdown_id FOREIGN KEY (breakdown_id) REFERENCES breakdown(breakdown_id) ON DELETE CASCADE 
 );
+
+C:/Users/Sarah/Desktop/python-to-postgres/sql/downtime_breakdown_rl.sql
 '''
 
