@@ -18,6 +18,11 @@ CREATE TABLE IF NOT EXISTS shift_report_status (
    name TEXT NOT NULL,
    PRIMARY KEY (report_status_id)
 );
+CREATE TABLE IF NOT EXISTS grease (
+   grease_id INT GENERATED ALWAYS AS IDENTITY,
+   name TEXT NOT NULL,
+   PRIMARY KEY (grease_id)
+);
 
 INSERT INTO downtime (name) VALUES ('Mechanical Downtime');
 INSERT INTO downtime (name) VALUES ('Electrical Downtime');
@@ -44,3 +49,5 @@ INSERT INTO shift_report_status (name) VALUES ('draft');
 INSERT INTO shift_report_status (name) VALUES ('submitted');
 INSERT INTO shift_report_status (name) VALUES ('rejected');
 INSERT INTO shift_report_status (name) VALUES ('approved');
+INSERT INTO grease (name) VALUES ('Tail Skin');
+INSERT INTO grease (name) VALUES ('EP2');

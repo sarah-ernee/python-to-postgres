@@ -3,12 +3,13 @@ import time
 from datetime import datetime
 import json
 
-# 5600 SHIFT REPORTS - VERSIONS TABLE NEED TO FOLLOW
+from helper import PostgresqlOperations
+helper = PostgresqlOperations()
+
 TUNNEL_DRIVES = ['OP-EB', 'OP-WB']
 SHIFT = ['DS', 'NS']
 RINGS = 1400
-MAX_VERSIONS = 10
-    
+
 REPORT_TABLE = 'shift_report'
 VERSION_TABLE = 'shift_report_version'
 
@@ -22,6 +23,7 @@ REPORT_COLUMNS = [
     'reported_by',
 ]
 VERSION_COLUMNS = [
+    'report_uid',
     'data',
     'updated_at',
 ]
@@ -59,17 +61,18 @@ def nullable(*args):
 
 if __name__ == '__main__':
     versions = []
-    reports = [] 
+    reports = []
 
     # 2800 rings per drive for both shifts - 5600 reports
     for ring_number in range(1, RINGS, 1):
         for tunnel_drive in TUNNEL_DRIVES:
-            for shift in SHIFT:
+            for shift in SHIFT:  
+                report_uid = helper.generate_report_uid()
                 date = datetime.utcfromtimestamp(time.time()) 
                 end_ring = random.randint(100, 2_800)
                 end_chainage = random.uniform(19_100.000000000, 19_300.000000000)
-                reported_by = random.choice(EMAILS)
-                
+                reported_by = random.choice(EMAILS)   
+
                 # -------------------------------------- JSONB DATA ------------------------------------- #
                 form_ref = f'{tunnel_drive}-R{ring_number}-{datetime.now().strftime("%Y%m%d")}'
                 status = random.choice(
@@ -98,81 +101,81 @@ if __name__ == '__main__':
                 total_comp_b = random.randrange(1_000, 4_500)
                 total_volume = total_comp_a + total_comp_b
 
-                v = random.randint(1, MAX_VERSIONS)
-                for version in range(v):
-                    updated_at = f"'{datetime.utcfromtimestamp(time.time() + 24 * 60 * 60 * version)}'"
-
-                    dict = {
-                        "formRef": form_ref,
-                        "status": status,
-                        "tbm": tbm,
-                        "tunnelDrive": tunnel_drive,
-                        "ring": ring_number,
-                        "chainage": chainage,
-                        "shift": shift,
-                        "timestamp": timestamp,
-                        "progress": {
-                            "cumulativeMinedDist": cumulative_mined_dist,
-                            "currentLocation": current_location,
-                            "endChainage": end_chainage,
-                            "endRingNumber": end_ring,
-                            "sensitiveStructures": sensitive_structures,
-                            "startChainage": start_chainage,
-                            "startRingNumber": ring_number,
+                # ------------------------------------ VERSION TABLE ------------------------------------ #
+                updated_at = f"'{datetime.utcfromtimestamp(time.time() + 24 * 60 * 60 * 1)}'"
+                dict = {
+                    "formRef": form_ref,
+                    "status": status,
+                    "tbm": tbm,
+                    "tunnelDrive": tunnel_drive,
+                    "ring": ring_number,
+                    "chainage": chainage,
+                    "shift": shift,
+                    "timestamp": timestamp,
+                    "progress": {
+                        "cumulativeMinedDist": cumulative_mined_dist,
+                        "currentLocation": current_location,
+                        "endChainage": end_chainage,
+                        "endRingNumber": end_ring,
+                        "sensitiveStructures": sensitive_structures,
+                        "startChainage": start_chainage,
+                        "startRingNumber": ring_number,
+                    },
+                    "statusDurationPercentage": {
+                        "durations": {
+                            "ringBuild": ring_duration,
+                            "stopped": stopped_duration
                         },
-                        "statusDurationPercentage": {
-                            "durations": {
-                                "ringBuild": ring_duration,
-                                "stopped": stopped_duration
-                            },
-                            "percentages": {
-                                "ringBuild": ring_duration_pc,
-                                "stopped": stopped_duration_pc
-                            }
-                        },
-                        "groutInfo": {
-                            "groutInjectionVolume": [
-                                {
-                                    "ringNumber": ring_number,
-                                    "target": target_injection, 
-                                    "totalVolume": total_volume, 
-                                    "totalCompA": total_comp_a,
-                                    "totalCompB": total_comp_b, 
-                                }
-                            ]
+                        "percentages": {
+                            "ringBuild": ring_duration_pc,
+                            "stopped": stopped_duration_pc
                         }
-                    }
-
-                    json_string = json.dumps(dict, default=str)
-                    data = f"'{json_string}'::jsonb"
-                        
-                    values = f"{data}, {updated_at}"
-                    versions.append(
-                        f'INSERT INTO {VERSION_TABLE} ({", ".join(VERSION_COLUMNS)}) VALUES ({values})'
-                    )
-
-                    if version == v - 1:
-                        report_value = [
-                            'uuid_generate_v4()',
-                            f"'{date}'",
-                            f"'{shift}'",
-                            f'{end_ring}',
-                            f'{end_chainage}',
-                            f"'{reported_by}'",
+                    },
+                    "groutInfo": {
+                        "groutInjectionVolume": [
+                            {
+                                "ringNumber": ring_number,
+                                "target": target_injection, 
+                                "totalVolume": total_volume, 
+                                "totalCompA": total_comp_a,
+                                "totalCompB": total_comp_b, 
+                            }
                         ]
-                        reports.append(
-                            f'INSERT INTO {REPORT_TABLE} ({", ".join(REPORT_COLUMNS)}) VALUES ({', '.join(report_value)})'
-                        )
+                    }
+                }
+
+                json_string = json.dumps(dict, default=str)
+                data = f"'{json_string}'::jsonb"
+                    
+                values = f"'{report_uid}'::uuid, {data}, {updated_at}"
+                versions.append(
+                    f'INSERT INTO {VERSION_TABLE} ({", ".join(VERSION_COLUMNS)}) VALUES ({values})'
+                )
+                
+                # --------------------------------------- REPORT TABLE ------------------------------------- #
+                # if version == v - 1:
+                report_value = [
+                    f"'{report_uid}'::uuid",
+                    f"'{date}'",
+                    f"'{shift}'",
+                    f'{end_ring}',
+                    f'{end_chainage}',
+                    f"'{reported_by}'",
+                ]
+                reports.append(
+                    f'INSERT INTO {REPORT_TABLE} ({", ".join(REPORT_COLUMNS)}) VALUES ({', '.join(report_value)})'
+                )
 
     with open('./sql/shift-report-version.sql', 'w') as file:
         for version in versions:
             file.write(version)
             file.write(';\n')
 
-    # with open('./sql/shift-report.sql', 'w') as file:
-    #     for report in reports:
-    #         file.write(report)
-    #         file.write(';\n')
+    with open('./sql/shift-report.sql', 'w') as file:
+        for report in reports:
+            file.write(report)
+            file.write(';\n')
+            
 
 
 '''
@@ -193,7 +196,7 @@ CREATE TABLE IF NOT EXISTS shift_report (
          ON DELETE CASCADE
 );
 
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+C:/Users/Sarah/Desktop/python-to-postgres/sql/shift-report.sql
 '''
 
 
@@ -201,15 +204,13 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS shift_report_version (
    report_uid UUID,
    version_number INT GENERATED ALWAYS AS IDENTITY NOT NULL, 
-   data JSONB NOT NULL,
-   updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+   data JSONB,
+   updated_at TIMESTAMP WITHOUT TIME ZONE,
    id INT GENERATED ALWAYS AS IDENTITY,
    PRIMARY KEY (id),
 
    CONSTRAINT report_uid FOREIGN KEY (report_uid) REFERENCES shift_report(report_uid) ON DELETE CASCADE
 );
 
-INSERT INTO shift_report_version (report_uid)
-SELECT (report_uid)::uuid
-FROM shift_report;
+C:/Users/Sarah/Desktop/python-to-postgres/sql/shift-report-version.sql
 '''
