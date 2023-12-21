@@ -51,8 +51,7 @@ class PostgresqlOperations:
         report_uids = []
 
         self.sql_cursor.execute('SELECT report_uid FROM shift_report;')
-        result = [row[0] for row in self.sql_cursor.fetchall()]
-        report_uids.append(result)
+        report_uids = [row[0] for row in self.sql_cursor.fetchall()]
 
         print("Report uids retrieved")
 
@@ -120,8 +119,7 @@ class PostgresqlOperations:
         grease_ids = []
         
         self.sql_cursor.execute('SELECT grease_id FROM grease;')
-        result = [row[0] for row in self.sql_cursor.fetchall()]
-        grease_ids.append(result)
+        grease_ids = [row[0] for row in self.sql_cursor.fetchall()]
 
         print("Grease ids retrieved")
 
