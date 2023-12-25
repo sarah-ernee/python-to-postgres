@@ -51,15 +51,11 @@ if __name__ == '__main__':
 
     # Foreign key retrieval
     report_uids = helper.retrieve_foreign_key_report_uid()
-    downtime_ids = helper.retrieve_cycle_foreign_keys_values()
-    breakdown_ids = helper.retrieve_cycle_foreign_keys_values()
-    tbm_status_ids = helper.retrieve_cycle_foreign_keys_values()
-    grease_ids = helper.retrieve_foreign_key_grease_id()
+    # downtime_ids = helper.retrieve_cycle_foreign_keys_values()
+    # breakdown_ids = helper.retrieve_cycle_foreign_keys_values()
+    # tbm_status_ids = helper.retrieve_cycle_foreign_keys_values()
+    # grease_ids = helper.retrieve_foreign_key_grease_id()
     n = 0
-
-    print(f"Current value of n: {n}, Length of report_uids: {len(report_uids)}")
-    print(f"Current value of n: {n}, Length of report_uids: {len(grease_ids)}")
-
 
     # same number of reports as shift reports - 5596
     for x in range(1, 5597):
@@ -71,16 +67,16 @@ if __name__ == '__main__':
         ring_number = x
 
         report_uid = report_uids[n]
-        downtime_id = random.choice(downtime_ids)
-        breakdown_id = random.choice(breakdown_ids)
-        tbm_status_id = random.choice(tbm_status_ids)
-        grease_id = random.choice(grease_ids)
+        downtime_id = random.randint(1, 6)
+        breakdown_id = random.randint(1, 10)
+        tbm_status_id = random.randint(1, 5)
+        grease_id = random.randint(1, 2)
 
         values = [
             f"'{report_uid}'::uuid",
             f'{downtime_id}',
             f'{breakdown_id}',
-            f"'{manufacture_defect}'",
+            f'{manufacture_defect}',
             f"'{remarks}'",
             f"'{start_time}'",
             f"'{end_time}'",
@@ -111,7 +107,48 @@ if __name__ == '__main__':
             file.write(cycle)
             file.write(';\n')
 
-    with open('./sql/grease_report.sql', 'w') as file:
-        for grease_report in grease_reports:
-            file.write(grease_report)
-            file.write(';\n')
+    # with open('./sql/grease_report.sql', 'w') as file:
+    #     for grease_report in grease_reports:
+    #         file.write(grease_report)
+    #         file.write(';\n')
+
+
+
+'''
+CREATE TABLE cycle_time (
+   report_uid UUID,
+   downtime_id INT,
+   breakdown_id INT,
+   manufacture_defect BOOLEAN,
+   remarks TEXT NOT NULL,
+   start_time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+   end_time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+   ring_number INT NOT NULL,
+   tbm_status_id INT,
+   id INT GENERATED ALWAYS AS IDENTITY,
+   PRIMARY KEY (id),
+
+   CONSTRAINT report_uid FOREIGN KEY (report_uid) REFERENCES shift_report(report_uid) ON DELETE CASCADE,
+   CONSTRAINT downtime_id FOREIGN KEY (downtime_id) REFERENCES downtime(downtime_id) ON DELETE CASCADE,
+   CONSTRAINT breakdown_id FOREIGN KEY (breakdown_id) REFERENCES breakdown(breakdown_id) ON DELETE CASCADE,
+   CONSTRAINT tbm_status_id FOREIGN KEY (tbm_status_id) REFERENCES shift_tbm_status(tbm_status_id) ON DELETE CASCADE
+);
+
+C:/Users/sarahng/python-to-postgres/sql/cycle_time.sql
+'''
+
+
+'''
+CREATE TABLE grease_report (
+   report_uid UUID,
+   ring_number INT NOT NULL,
+   grease_id INT,
+   id INT GENERATED ALWAYS AS IDENTITY, 
+   
+   PRIMARY KEY (id),
+   CONSTRAINT report_uid FOREIGN KEY (report_uid) REFERENCES reports(report_uid) ON DELETE CASCADE,
+   CONSTRAINT grease_id FOREIGN KEY (grease_id) REFERENCES grease(grease_id) ON DELETE CASCADE
+ );
+ 
+C:/Users/sarahng/python-to-postgres/sql/grease_report.sql
+'''
