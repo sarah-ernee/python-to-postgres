@@ -8,9 +8,9 @@ class PostgresqlOperations:
         '''
 
         connection_params = {
-            'user': 'sarah',
-            'password': 'wtpsydneymetro2023',
-            'host': '34.151.111.183',
+            'user': 'postgres',
+            'password': 'sgtunneldev2024',
+            'host': '10.50.10.11',
             'port': '5432',
             'database': 'shift_progress_data'
         }
