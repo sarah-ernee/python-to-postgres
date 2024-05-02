@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from helper import PostgresqlOperations
 helper = PostgresqlOperations()
 
+TUNNEL_DRIVES = ['OP-EB', 'OP-WB']
 CYCLE_TABLE = 'shift_cycle_time'
 # GREASE_REPORT_TABLE = 'grease_report'
 
@@ -12,6 +13,7 @@ CYCLE_TABLE = 'shift_cycle_time'
 # no need to remove FKs since we are retrieving them with helper functions
 CYCLE_COLUMNS = [
     'report_uid',
+    'tunnel_drive',
     'downtime_id',
     'breakdown_id',
     'manufacture_defect',
@@ -72,68 +74,71 @@ if __name__ == '__main__':
 
     # same number of reports as shift reports - 5596
     for x in range(1, 5597):
-        # ------------------------------------- CYCLE TIME ----------------------------------------- #
-        manufacture_defect = random.choice(BOOLEAN)
-        remarks = random.choice(REMARKS)
-        start_time = datetime.fromtimestamp(time.time())
-        end_time = datetime.fromtimestamp(time.time() + 2 * 60) # always two hours later
-        ring = x
-        tbm_status = random.choice(TBM_STATUSES)
-        report_status = random.choice(REPORT_STATUSES)
+        for tbm_status in TBM_STATUSES:
+            # ------------------------------------- CYCLE TIME ----------------------------------------- #
+            manufacture_defect = random.choice(BOOLEAN)
+            remarks = random.choice(REMARKS)
+            start_time = datetime.fromtimestamp(time.time())
+            end_time = datetime.fromtimestamp(time.time() + 2 * 60) # always two hours later
+            ring = x
+            tunnel_drive = random.choice(TUNNEL_DRIVES)
+            report_status = random.choice(REPORT_STATUSES)
 
-        report_uid = report_uids[n]
-        downtime_id = random.randint(1, 6)
-        breakdown_id = random.randint(1, 10)
-        # tbm_status_id = random.randint(1, 5)
-        # grease_id = random.randint(1, 2)
+            report_uid = report_uids[n]
+            downtime_id = random.randint(1, 6)
+            breakdown_id = random.randint(1, 10)
+            # tbm_status_id = random.randint(1, 5)
+            # grease_id = random.randint(1, 2)
 
-        values = [
-            f"'{report_uid}'::uuid",
-            f'{downtime_id}',
-            f'{breakdown_id}',
-            f'{manufacture_defect}',
-            f"'{remarks}'",
-            f"'{start_time}'",
-            f"'{end_time}'",
-            f'{ring}',
-            f"'{tbm_status}'",
-            f"'{report_status}'",
-        ] 
+            values = [
+                f"'{report_uid}'::uuid",
+                f"'{tunnel_drive}'",
+                f'{downtime_id}',
+                f'{breakdown_id}',
+                f'{manufacture_defect}',
+                f"'{remarks}'",
+                f"'{start_time}'",
+                f"'{end_time}'",
+                f'{ring}',
+                f"'{tbm_status}'",
+                f"'{report_status}'",
+            ] 
+            
+            cycles.append(
+                f'INSERT INTO {CYCLE_TABLE} ({", ".join(CYCLE_COLUMNS)}) VALUES ({", ".join(values)})'
+            )
         
+            # --------------------------------- GREASE REPORT TABLE ------------------------------------- #
+            # report_values = [
+            #     f"'{report_uid}'::uuid",
+            #     f'{ring_number}',
+            #     f'{grease_id}',
+            # ]
+            # grease_reports.append(
+            #     f'INSERT INTO {GREASE_REPORT_TABLE} ({", ".join(GREASE_REPORT_COLUMNS)}) VALUES ({", ".join(report_values)})'
+            # )
+
         n = n + 1
         print(f"Running generator loop for the {n} time")
 
-        cycles.append(
-            f'INSERT INTO {CYCLE_TABLE} ({", ".join(CYCLE_COLUMNS)}) VALUES ({", ".join(values)})'
-        )
-    
-        # --------------------------------- GREASE REPORT TABLE ------------------------------------- #
-        # report_values = [
-        #     f"'{report_uid}'::uuid",
-        #     f'{ring_number}',
-        #     f'{grease_id}',
-        # ]
-        # grease_reports.append(
-        #     f'INSERT INTO {GREASE_REPORT_TABLE} ({", ".join(GREASE_REPORT_COLUMNS)}) VALUES ({", ".join(report_values)})'
-        # )
+                
+        with open('./sql-sg/cycle_time.sql', 'w') as file:
+            for cycle in cycles:
+                file.write(cycle)
+                file.write(';\n')
 
-            
-    with open('./sql-sg/cycle_time.sql', 'w') as file:
-        for cycle in cycles:
-            file.write(cycle)
-            file.write(';\n')
-
-    # with open('./sql-sg/grease_report.sql', 'w') as file:
-    #     for grease_report in grease_reports:
-    #         file.write(grease_report)
-    #         file.write(';\n')
+        # with open('./sql-sg/grease_report.sql', 'w') as file:
+        #     for grease_report in grease_reports:
+        #         file.write(grease_report)
+        #         file.write(';\n')
 
 
 
 '''
 CREATE TABLE shift_cycle_time (
    id int generated always as identity,  
-   report_uid uuid NOT NULL,	  
+   report_uid uuid NOT NULL,
+   tunnel_drive text NOT NULL,	  
    downtime_id int,	  
    breakdown_id int,	  
    manufacture_defect bool,	  
@@ -152,7 +157,6 @@ CREATE TABLE shift_cycle_time (
 );
 
 C:/Users/Sarah/Desktop/python-to-postgres/sql-sg/cycle_time.sql
-C:/Users/Sarah/Desktop/python-to-postgres/sql-sg/create_index.sql
 '''
 
 
