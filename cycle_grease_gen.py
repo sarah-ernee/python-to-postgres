@@ -73,13 +73,13 @@ if __name__ == '__main__':
     n = 0
 
     # same number of reports as shift reports - 5596
-    for x in range(1, 5597):
+    for x in range(1, 3000):
         for tbm_status in TBM_STATUSES:
             # ------------------------------------- CYCLE TIME ----------------------------------------- #
             manufacture_defect = random.choice(BOOLEAN)
             remarks = random.choice(REMARKS)
             start_time = datetime.fromtimestamp(time.time())
-            end_time = datetime.fromtimestamp(time.time() + 2 * 60) # always two hours later
+            end_time = datetime.fromtimestamp(time.time() + random.randint(120, 2400))
             ring = x
             tunnel_drive = random.choice(TUNNEL_DRIVES)
             report_status = random.choice(REPORT_STATUSES)
