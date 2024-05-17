@@ -1,5 +1,6 @@
 import psycopg2
 import uuid
+from datetime import datetime, timedelta
 
 class PostgresqlOperations:
     def __init__(self) -> None:
@@ -8,11 +9,17 @@ class PostgresqlOperations:
         '''
 
         connection_params = {
+            # 'user': 'postgres',
+            # 'password': 'sgtunneldev2024',
+            # 'host': '10.50.10.11',
+            # 'port': '5432',
+            # 'database': 'shift_progress_data'
+
             'user': 'postgres',
-            'password': 'sgtunneldev2024',
-            'host': '10.50.10.11',
+            'password': 'password',
+            'host': '127.0.0.1',
             'port': '5432',
-            'database': 'shift_progress_data'
+            'database': 'postgres'
         }
         self.sql_conn = psycopg2.connect(**connection_params)
         self.sql_cursor = self.sql_conn.cursor()
@@ -54,6 +61,38 @@ class PostgresqlOperations:
         report_uids = [row[0] for row in self.sql_cursor.fetchall()]
 
         return report_uids
+    
+
+    def change_date(self) -> None:
+        current_date = datetime(2024, 1, 1)
+        date_increment = timedelta(days=1)
+        n = 0
+
+        query = '''
+            UPDATE 
+                shift_report
+            SET
+                created_at = %(current_date)s
+            WHERE report_uid = (
+                SELECT 
+                    report_uid
+                FROM 
+                    shift_report 
+                OFFSET %(n)s 
+                LIMIT 1
+            );
+        '''
+
+        for _ in range(1, 5597):
+            self.sql_cursor.execute(query, current_date, n)
+            current_date += date_increment
+            n += 1
+
+            if current_date.day == 28: 
+                current_date = current_date.replace(day=1, month=current_date.month + 1)
+                if current_date.month == 12:
+                    current_date = current_date.replace(day=1, month=1, year=current_date.year + 1)
+
 
 
     # def retrieve_cycle_foreign_keys_values(self) -> list:
@@ -129,4 +168,3 @@ class PostgresqlOperations:
         report_uid = str(uuid.uuid4())
         return report_uid
     
-

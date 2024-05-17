@@ -1,6 +1,6 @@
 import random
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import json
 
 from helper import PostgresqlOperations
@@ -63,11 +63,16 @@ REPORT_STATUSES = [
     'rejected',
     'approved'
 ]
+
+current_date = datetime(2024, 1, 1)
+date_increment = timedelta(days=1)
+ring_counter = 0
  
  
 
 def nullable(*args):
     return random.choice(['null', *args])
+
 
 
 if __name__ == '__main__':
@@ -79,7 +84,7 @@ if __name__ == '__main__':
         for tunnel_drive in TUNNEL_DRIVES:
             for shift in SHIFT:  
                 report_uid = helper.generate_report_uid()
-                created_at = datetime.fromtimestamp(time.time())
+                created_at = current_date + timedelta(minutes=random.randint(0,1435))
                 end_ring = random.randint(1, 2_800)
                 end_chainage = random.uniform(19_100.000000000, 19_300.000000000)
                 created_by = random.choice(EMAILS)
@@ -184,6 +189,13 @@ if __name__ == '__main__':
     #     for version in versions:
     #         file.write(version)
     #         file.write(';\n')
+
+        # Increase date every ring
+        current_date += date_increment
+        if current_date.day == 28: 
+            current_date = current_date.replace(day=1, month=current_date.month + 1)
+            if current_date.month == 12:
+                current_date = current_date.replace(day=1, month=1, year=current_date.year + 1)
 
     with open('./sql-sg/shift-report.sql', 'w') as file:
         for report in reports:

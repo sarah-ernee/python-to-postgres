@@ -73,64 +73,63 @@ if __name__ == '__main__':
     n = 0
 
     # same number of reports as shift reports - 5596
-    for x in range(1, 3000):
-        for tbm_status in TBM_STATUSES:
-            # ------------------------------------- CYCLE TIME ----------------------------------------- #
-            manufacture_defect = random.choice(BOOLEAN)
-            remarks = random.choice(REMARKS)
-            start_time = datetime.fromtimestamp(time.time())
-            end_time = datetime.fromtimestamp(time.time() + random.randint(120, 2400))
-            ring = x
-            tunnel_drive = random.choice(TUNNEL_DRIVES)
-            report_status = random.choice(REPORT_STATUSES)
+    for x in range(1, 3001):
+        for tunnel_drive in TUNNEL_DRIVES:
+            for tbm_status in TBM_STATUSES:
+                # ------------------------------------- CYCLE TIME ----------------------------------------- #
+                manufacture_defect = random.choice(BOOLEAN)
+                remarks = random.choice(REMARKS)
+                start_time = datetime.fromtimestamp(time.time())
+                end_time = datetime.fromtimestamp(time.time() + random.randint(120, 2400))
+                ring = x
+                report_status = random.choice(REPORT_STATUSES)
 
-            report_uid = report_uids[n]
-            downtime_id = random.randint(1, 6)
-            breakdown_id = random.randint(1, 10)
-            # tbm_status_id = random.randint(1, 5)
-            # grease_id = random.randint(1, 2)
+                report_uid = report_uids[n]
+                downtime_id = random.randint(1, 6)
+                breakdown_id = random.randint(1, 10)
+                # tbm_status_id = random.randint(1, 5)
+                # grease_id = random.randint(1, 2)
 
-            values = [
-                f"'{report_uid}'::uuid",
-                f"'{tunnel_drive}'",
-                f'{downtime_id}',
-                f'{breakdown_id}',
-                f'{manufacture_defect}',
-                f"'{remarks}'",
-                f"'{start_time}'",
-                f"'{end_time}'",
-                f'{ring}',
-                f"'{tbm_status}'",
-                f"'{report_status}'",
-            ] 
+                values = [
+                    f"'{report_uid}'::uuid",
+                    f"'{tunnel_drive}'",
+                    f'{downtime_id}',
+                    f'{breakdown_id}',
+                    f'{manufacture_defect}',
+                    f"'{remarks}'",
+                    f"'{start_time}'",
+                    f"'{end_time}'",
+                    f'{ring}',
+                    f"'{tbm_status}'",
+                    f"'{report_status}'",
+                ] 
+                
+                cycles.append(
+                    f'INSERT INTO {CYCLE_TABLE} ({", ".join(CYCLE_COLUMNS)}) VALUES ({", ".join(values)})'
+                )
             
-            cycles.append(
-                f'INSERT INTO {CYCLE_TABLE} ({", ".join(CYCLE_COLUMNS)}) VALUES ({", ".join(values)})'
-            )
-        
-            # --------------------------------- GREASE REPORT TABLE ------------------------------------- #
-            # report_values = [
-            #     f"'{report_uid}'::uuid",
-            #     f'{ring_number}',
-            #     f'{grease_id}',
-            # ]
-            # grease_reports.append(
-            #     f'INSERT INTO {GREASE_REPORT_TABLE} ({", ".join(GREASE_REPORT_COLUMNS)}) VALUES ({", ".join(report_values)})'
-            # )
+                # --------------------------------- GREASE REPORT TABLE ------------------------------------- #
+                # report_values = [
+                #     f"'{report_uid}'::uuid",
+                #     f'{ring_number}',
+                #     f'{grease_id}',
+                # ]
+                # grease_reports.append(
+                #     f'INSERT INTO {GREASE_REPORT_TABLE} ({", ".join(GREASE_REPORT_COLUMNS)}) VALUES ({", ".join(report_values)})'
+                # )
+                    
+            with open('./sql-sg/cycle_time.sql', 'w') as file:
+                for cycle in cycles:
+                    file.write(cycle)
+                    file.write(';\n')
+
+            # with open('./sql-sg/grease_report.sql', 'w') as file:
+            #     for grease_report in grease_reports:
+            #         file.write(grease_report)
+            #         file.write(';\n')
 
         n = n + 1
         print(f"Running generator loop for the {n} time")
-
-                
-        with open('./sql-sg/cycle_time.sql', 'w') as file:
-            for cycle in cycles:
-                file.write(cycle)
-                file.write(';\n')
-
-        # with open('./sql-sg/grease_report.sql', 'w') as file:
-        #     for grease_report in grease_reports:
-        #         file.write(grease_report)
-        #         file.write(';\n')
 
 
 
@@ -157,6 +156,7 @@ CREATE TABLE shift_cycle_time (
 );
 
 C:/Users/Sarah/Desktop/python-to-postgres/sql-sg/cycle_time.sql
+C:/Users/Sarah/Desktop/python-to-postgres/fml.sql
 '''
 
 
