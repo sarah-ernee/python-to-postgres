@@ -30,8 +30,8 @@ def generate_dummy_data(date_str):
     }
 
 # Generate dummy data for each day from January to May 2024
-start_date = datetime(2024, 1, 1)
-end_date = datetime(2024, 5, 31)
+start_date = datetime(2024, 6, 1)
+end_date = datetime(2025, 12, 31)
 delta = timedelta(days=1)
 current_date = start_date
 
